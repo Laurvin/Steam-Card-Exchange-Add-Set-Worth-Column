@@ -1,16 +1,16 @@
 // ==UserScript==
-// @name        Steam Card Exchange Add Set Worth Column
-// @namespace   Steam Card Exchange Add Set Worth Column
-// @author      Laurvin
+// @name Steam Card Exchange Add Set Worth Column
+// @namespace Steam Card Exchange Add Set Worth Column
+// @author Laurvin
 // @description Adds Set Worth
-// @version     1.1
-// @icon        http://i.imgur.com/XYzKXzK.png
+// @version 1.1
+// @icon http://i.imgur.com/XYzKXzK.png
 // @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Add-Set-Worth-Column/raw/master/Steam_Card_Exchange_Add_Set_Worth_Column.user.js
-// @include     http://www.steamcardexchange.net/index.php?userlist
-// @include     https://www.steamcardexchange.net/index.php?userlist
-// @include     http://www.steamcardexchange.net/index.php?inventory
-// @include     https://www.steamcardexchange.net/index.php?inventory
-// @grant       none
+// @include http://www.steamcardexchange.net/index.php?userlist
+// @include https://www.steamcardexchange.net/index.php?userlist
+// @include http://www.steamcardexchange.net/index.php?inventory
+// @include https://www.steamcardexchange.net/index.php?inventory
+// @grant none
 // @run-at document-idle
 // ==/UserScript==
 
