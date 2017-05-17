@@ -3,7 +3,7 @@
 // @namespace Steam Card Exchange Add Set Worth Column
 // @author Laurvin
 // @description Adds Set Worth
-// @version 1.1
+// @version 1.2
 // @icon http://i.imgur.com/XYzKXzK.png
 // @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Add-Set-Worth-Column/raw/master/Steam_Card_Exchange_Add_Set_Worth_Column.user.js
 // @include http://www.steamcardexchange.net/index.php?userlist
@@ -17,7 +17,7 @@
 $( document ).ready(function()
 	{
 	console.log("Starting Steam Card Exchange Add Set Worth Column!");
-	$("#inventorylist tr:first").append('<th>Set Worth</th>');
+	$("#inventorylist tr:first").append('<th title="Set Worth">S W</th>');
 
 	var MyRows = $('#inventorylist').find('tbody').find('tr');
 
