@@ -3,7 +3,7 @@
 // @namespace Steam Card Exchange Add Set Worth Column
 // @author Laurvin
 // @description Adds Set Worth
-// @version 2.0
+// @version 2.1
 // @icon http://i.imgur.com/XYzKXzK.png
 // @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Add-Set-Worth-Column/raw/master/Steam_Card_Exchange_Add_Set_Worth_Column.user.js
 // @include http://www.steamcardexchange.net/index.php?userlist
@@ -35,7 +35,10 @@ $( document ).ready(function()
 	
 	function ChangeTable(TableID, InitialSort)
 	{
-		$(`#${TableID} tr:first`).append('<th title="Set Worth">S W</th>');
+		$('#inventory-content').find('.content-box-switch').css("display","none");
+		
+		$(`#${TableID} thead tr:first th:eq(2)`).text('Stock');
+		$(`#${TableID} thead tr:first`).append('<th title="Set Worth">S W</th>');
 
 		var MyRows = $(`#${TableID}`).find('tbody').find('tr');
 		console.log("Rows", MyRows.length);
@@ -43,12 +46,23 @@ $( document ).ready(function()
 		{
 			var Worth = $(MyRows[i]).find('td:eq(1)').text();
 			var SetSize = $(MyRows[i]).find('td:eq(3)').text();
-			SetSize = SetSize.substring(SetSize.length - 9, SetSize.length - 7);
+			var NewSetsAvail = SetSize.substring(0, SetSize.length - 7) + ')'; // Making the column smaller by removing the word Cards.
+			var SetSizeStart = SetSize.indexOf('of');
+			var SetSizeEnd = SetSize.indexOf(')');
+			var CardsIncluded = (SetSize.indexOf('Cards') == -1) ? 0 : -5; // Need to subtract more if the word Cards is still there.
+			SetSize = SetSize.substring(SetSizeStart + 3 , SetSizeEnd + CardsIncluded);
 			var SetWorth = Worth*SetSize;
+			$(MyRows[i]).find('td:eq(3)').text(NewSetsAvail);
 			$(MyRows[i]).append('<td>'+SetWorth+'</td>');
+			var GameColor = $(MyRows[i]).find('a').attr('class');
+			if (TableID == 'inventorylist' && GameColor != "green")
+			{
+				$(MyRows[i]).css("display","none");
+			}
 		}
 
 		$(`#${TableID}`).dataTable( {
+			dom: 'rt<"dataTables_footer"ip>',
 			"searching": false,
 			"destroy": true,
 			pageLength: -1,
@@ -60,5 +74,5 @@ $( document ).ready(function()
 		console.log("Finished Steam Card Exchange Add Set Worth Column!");
 	}
 	
-	myVar = setTimeout(ChangeTable, 2500, TableID, InitialSort);
+	myVar = setTimeout(ChangeTable, 2000, TableID, InitialSort);
 });
