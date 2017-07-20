@@ -3,7 +3,7 @@
 // @namespace Steam Card Exchange Add Set Worth Column
 // @author Laurvin
 // @description Adds Set Worth
-// @version 2.5
+// @version 2.6
 // @icon http://i.imgur.com/XYzKXzK.png
 // @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Add-Set-Worth-Column/raw/master/Steam_Card_Exchange_Add_Set_Worth_Column.user.js
 // @include http://www.steamcardexchange.net/index.php?userlist
@@ -13,9 +13,6 @@
 // @grant GM_xmlhttpRequest
 // @run-at document-idle
 // ==/UserScript==
-
-// http://www.steamcardexchange.net/api/request.php?GetWatchlist_Private
-// http://www.steamcardexchange.net/api/request.php?GetInventory
 
 var AppsOwned = {};
 
@@ -40,22 +37,24 @@ $( document ).ready(function()
 		$('#BoosterCalc').click(function()
 		{
 			$('#BoosterCalc').text('This will take 2.1 seconds.');
+			$('h1.empty').append('<a href="http://steamcommunity.com/tradingcards/boostercreator/" class="button-blue" id="BoosterLink" style="margin-top: 25px;" target="_blank">To Booster Creator</a>');
 			function GetBoosterPage()
 			{
 				console.log('Getting Owned Apps');
 				
-				var ThisIsToday = new Date(); // Using day to make sure Steam doesn't cache the results for more than a day.
-				var DayNumber = ThisIsToday.getDate();
-				
 				GM_xmlhttpRequest({
 					method: 'GET',
-					url: 'http://store.steampowered.com/dynamicstore/userdata/?d=' + DayNumber,
+					url: 'http://store.steampowered.com/dynamicstore/userdata/',
 					timeout: 2000,
 					onload: function (response)
 					{
 						var AppsJSON = JSON.parse(response.responseText);
 
-						if (AppsJSON.rgOwnedApps.length === 0) alert('You need to be logged into the Steam Store on this browser to use this function.');
+						if (AppsJSON.rgOwnedApps.length === 0)
+						{
+							alert('You need to be logged into the Steam Store on this browser to use this function.');
+							return;
+						}
 						
 						$.each(AppsJSON.rgOwnedApps, function (index, item)
 						{
