@@ -3,7 +3,7 @@
 // @namespace Steam Card Exchange Add Set Worth Column
 // @author Laurvin
 // @description Adds Set Worth
-// @version 3.0
+// @version 3.3
 // @icon http://i.imgur.com/XYzKXzK.png
 // @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Add-Set-Worth-Column/raw/master/Steam_Card_Exchange_Add_Set_Worth_Column.user.js
 // @include http://www.steamcardexchange.net/index.php?userlist
@@ -13,6 +13,8 @@
 // @grant GM_xmlhttpRequest
 // @run-at document-idle
 // ==/UserScript==
+
+/* globals jQuery, $ */
 
 var AppsOwned = {};
 var AddSetWorth = "";
@@ -124,7 +126,14 @@ function ChangeTable(TableID, InitialSort, BoosterCalc)
 	else
 	{
 		$(`#${TableID} thead tr:first th:eq(2)`).text('Stock');
-		$(`#${TableID} thead tr:first`).append('<th title="Set Worth">S W</th>');
+
+        if (TableID == "inventorylist")
+        {
+            $(`#${TableID} thead tr:first th:eq(4)`).text('Set Worth');
+        } else {
+            $(`#${TableID} thead tr:first th:eq(3)`).text('Available');
+            $(`#${TableID} thead tr:first`).append('<th title="Set Worth">S W</th>');
+        }
 	}
 
 	var MyRows = $(`#${TableID}`).find('tbody').find('tr');
@@ -133,11 +142,15 @@ function ChangeTable(TableID, InitialSort, BoosterCalc)
 	{
 		var Worth = $(MyRows[i]).find('td:eq(1)').text();
 		var SetSize = $(MyRows[i]).find('td:eq(3)').text();
-		var NewSetsAvail = SetSize.substring(0, SetSize.length - 7) + ')'; // Making the column smaller by removing the word Cards.
-		var SetSizeStart = SetSize.indexOf('of');
-		var SetSizeEnd = SetSize.indexOf(')');
-		var CardsIncluded = (SetSize.indexOf('Cards') == -1) ? 0 : -5; // Need to subtract more if the word Cards is still there.
-		SetSize = SetSize.substring(SetSizeStart + 3 , SetSizeEnd + CardsIncluded);
+
+        if (TableID == "private_watchlist")
+        {
+            var NewSetsAvail = SetSize.substring(3, SetSize.length - 7) + ')'; // Making the column smaller by removing the word Cards.
+            var SetSizeStart = SetSize.indexOf('of');
+            var SetSizeEnd = SetSize.indexOf(')');
+            var CardsIncluded = (SetSize.indexOf('Cards') == -1) ? 0 : -5; // Need to subtract more if the word Cards is still there.
+            SetSize = SetSize.substring(SetSizeStart + 3 , SetSizeEnd + CardsIncluded);
+        }
 
 		if (BoosterCalc == "yes")
 		{
@@ -159,8 +172,15 @@ function ChangeTable(TableID, InitialSort, BoosterCalc)
 		{
 			var SetWorth = Worth*SetSize;
 			$(MyRows[i]).find('td:eq(3)').text(NewSetsAvail);
-			$(MyRows[i]).append('<td>'+SetWorth+'</td>');
-			var GameColor = $(MyRows[i]).find('a').attr('class');
+
+            if (TableID == "inventorylist")
+            {
+                $(MyRows[i]).find('td:eq(4)').text(SetWorth);
+            } else {
+                $(MyRows[i]).append('<td>'+SetWorth+'</td>');
+            }
+
+            var GameColor = $(MyRows[i]).find('a').attr('class');
 			var StyleColor = $(MyRows[i]).find('a').css('color'); // Used by personal Stylish style.
 			if (TableID == 'inventorylist' && (GameColor != "green" || StyleColor == 'rgb(255, 0, 0)'))
 			{
