@@ -3,14 +3,16 @@
 // @namespace Steam Card Exchange Add Set Worth Column
 // @author Laurvin
 // @description Adds Set Worth
-// @version 3.3
-// @icon http://i.imgur.com/XYzKXzK.png
+// @version 3.4
+// @icon https://i.imgur.com/XYzKXzK.png
 // @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Add-Set-Worth-Column/raw/master/Steam_Card_Exchange_Add_Set_Worth_Column.user.js
-// @include http://www.steamcardexchange.net/index.php?userlist
-// @include https://www.steamcardexchange.net/index.php?userlist
-// @include http://www.steamcardexchange.net/index.php?inventory
-// @include https://www.steamcardexchange.net/index.php?inventory
+// @updateURL https://github.com/Laurvin/Steam-Card-Exchange-Add-Set-Worth-Column/raw/master/Steam_Card_Exchange_Add_Set_Worth_Column.user.js
+// @match http://www.steamcardexchange.net/index.php?userlist
+// @match https://www.steamcardexchange.net/index.php?userlist
+// @match http://www.steamcardexchange.net/index.php?inventory
+// @match https://www.steamcardexchange.net/index.php?inventory
 // @grant GM_xmlhttpRequest
+// @connect store.steampowered.com
 // @run-at document-idle
 // ==/UserScript==
 
@@ -44,8 +46,8 @@ function init()
 		$('#BoosterCalc').click(function()
 		{
 			$('#BoosterCalc').text('Loading...');
-			$('h1.empty').append('<a href="http://steamcommunity.com/tradingcards/boostercreator/" class="button-blue" id="BoosterLink" style="margin-top: 25px;" target="_blank">To Booster Creator</a>');
-			loadBoosterPage('http://store.steampowered.com/dynamicstore/userdata/');
+			$('h1.empty').append('<a href="https://steamcommunity.com/tradingcards/boostercreator/" class="button-blue" id="BoosterLink" style="margin-top: 25px;" target="_blank">To Booster Creator</a>');
+			loadBoosterPage('https://store.steampowered.com/dynamicstore/userdata/');
 		});
 	}
 
@@ -59,7 +61,7 @@ function init()
 	} ).dataTable();
 
 	// We can't divine when the full table is on the page via .on() so we just wait two seconds before calling ChangeTable.
-	AddSetWorth = setTimeout(ChangeTable, 2000, TableID, InitialSort, 'no');
+	AddSetWorth = setTimeout(ChangeTable, 4000, TableID, InitialSort, 'no');
 }
 
 function monkeyRequest(url) {
@@ -95,7 +97,8 @@ function loadBoosterPage(url) {
 
 function parseBoosterPage(BoosterJSON)
 {
-	if (BoosterJSON.rgOwnedApps.length === 0)
+    console.log(BoosterJSON.rgOwnedApps);
+    if (BoosterJSON.rgOwnedApps.length === 0)
 	{
 		alert('You need to be logged into the Steam Store on this browser to use this function.');
 		return;
@@ -211,7 +214,7 @@ function FilterTable(TableID)
 		var GameColor = $(MyRows[i]).find('a').attr('class');
 		var StyleColor = $(MyRows[i]).find('a').css('color');
 
-		if (CurrentFilter == 'All')
+        if (CurrentFilter == 'All')
 		{
 			$(MyRows[i]).css("display","table-row");
 		}
