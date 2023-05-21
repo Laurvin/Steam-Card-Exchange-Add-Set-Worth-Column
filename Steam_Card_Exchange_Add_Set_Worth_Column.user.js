@@ -3,7 +3,7 @@
 // @namespace Steam Card Exchange Add Set Worth Column
 // @author Laurvin
 // @description Adds Set Worth
-// @version 3.4
+// @version 4.0
 // @icon https://i.imgur.com/XYzKXzK.png
 // @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Add-Set-Worth-Column/raw/master/Steam_Card_Exchange_Add_Set_Worth_Column.user.js
 // @updateURL https://github.com/Laurvin/Steam-Card-Exchange-Add-Set-Worth-Column/raw/master/Steam_Card_Exchange_Add_Set_Worth_Column.user.js
@@ -22,8 +22,6 @@ var AppsOwned = {};
 var AddSetWorth = "";
 var TableID = (window.location.href.indexOf("userlist") > -1)? 'private_watchlist' : 'inventorylist';
 var InitialSort = (window.location.href.indexOf("userlist") > -1)? 'desc' : 'asc';
-var FilterButtonValue = (window.location.href.indexOf("userlist") > -1)? 'Green' : 'All';
-var FilterButtonText = (window.location.href.indexOf("userlist") > -1)? 'Show Only Green' : 'Show All';
 
 $( document ).ready(function()
 {
@@ -34,19 +32,29 @@ function init()
 {
 	console.log("Starting Steam Card Exchange Add Set Worth Column!");
 
-	$('h1.empty').append('<button class="button-blue" id="SCEFilter" value="' + FilterButtonValue + '" style="margin-top: 25px;">' + FilterButtonText + '</button>');
-	$('#SCEFilter').click(function()
+    $("<style type='text/css'> .w-14 {width: 3.5rem;} </style>").appendTo("head"); // Adding a 56px wide style for the columns.
+
+	$('span[class="tracking-wider font-league-gothic"]').eq(1).after('&nbsp;<a class="btn-primary lg:w-min" id="HideButtons" title="Hide the below div with the checkbox toggles that control the table filtering.">Hide Toggles</a>');
+	$('#HideButtons').data("hide-show", "Hide");
+    $('#HideButtons').on("click", function()
+	{
+		HideButtons();
+	});
+
+	$('#HideButtons').after('&nbsp;<a class="btn-primary lg:w-min" id="SCEFilter" title="Hides all rows not Green (Normal Price Games), cannot use the toggles below cause that messes with filtering.">Show Green</a>');
+	$('#SCEFilter').data("green-all", "Green");
+    $('#SCEFilter').on("click", function()
 	{
 		FilterTable(TableID);
 	});
 
 	if (TableID == "inventorylist")
 	{
-		$('h1.empty').append('<button class="button-blue" id="BoosterCalc" style="margin-top: 25px;">Calculate Boosterpack Values</button>');
-		$('#BoosterCalc').click(function()
+		$('#SCEFilter').after('&nbsp;<a class="btn-primary lg:w-min" id="BoosterCalc" title="Make sure to open both the Steam Inventory and Steam Store in tabs in this browser session before clicking this button!">Calculate Boosterpack Values</a>');
+		$('#BoosterCalc').on("click", function()
 		{
 			$('#BoosterCalc').text('Loading...');
-			$('h1.empty').append('<a href="https://steamcommunity.com/tradingcards/boostercreator/" class="button-blue" id="BoosterLink" style="margin-top: 25px;" target="_blank">To Booster Creator</a>');
+			$('#BoosterCalc').after('&nbsp;<a href="https://steamcommunity.com/tradingcards/boostercreator/" class="btn-primary lg:w-min" id="BoosterLink" target="_blank" title="Opens the Steam Booster Creator in a new tab.">To Booster Creator</a>');
 			loadBoosterPage('https://store.steampowered.com/dynamicstore/userdata/');
 		});
 	}
@@ -60,11 +68,12 @@ function init()
 		}
 	} ).dataTable();
 
-	// We can't divine when the full table is on the page via .on() so we just wait two seconds before calling ChangeTable.
+	// We can't divine when the full table is on the page via .on() so we just wait some seconds before calling ChangeTable.
 	AddSetWorth = setTimeout(ChangeTable, 4000, TableID, InitialSort, 'no');
 }
 
-function monkeyRequest(url) {
+function monkeyRequest(url)
+{
 	return new Promise(function(resolve, reject) {
 		GM_xmlhttpRequest({
 			method: 'GET',
@@ -85,7 +94,8 @@ function monkeyRequest(url) {
 	});
 }
 
-function loadBoosterPage(url) {
+function loadBoosterPage(url)
+{
 	console.log('Getting Owned Apps');
 	monkeyRequest(url).then(function(response) {
 		parseBoosterPage(response);
@@ -116,44 +126,21 @@ function parseBoosterPage(BoosterJSON)
 
 function ChangeTable(TableID, InitialSort, BoosterCalc)
 {
-	$('#inventory-content').find('.content-box-switch').css("display","none");
-
-	var SortedColumn = 4;
-
-	if (BoosterCalc == "yes")
-	{
-		SortedColumn = 5;
-		InitialSort = 'desc';
-		$(`#${TableID} thead tr:first`).append('<th title="Booster Value">B V</th>');
-	}
-	else
-	{
-		$(`#${TableID} thead tr:first th:eq(2)`).text('Stock');
-
-        if (TableID == "inventorylist")
-        {
-            $(`#${TableID} thead tr:first th:eq(4)`).text('Set Worth');
-        } else {
-            $(`#${TableID} thead tr:first th:eq(3)`).text('Available');
-            $(`#${TableID} thead tr:first`).append('<th title="Set Worth">S W</th>');
-        }
-	}
+    $(`#${TableID} thead tr th`).each(function(index)
+    {
+      if (index >= 3 && index <= 4) // Check if the current column is the 4th through 5th column (index 3 or 4)
+      {
+        $(this).removeClass('w-32'); // Remove the existing classes
+        $(this).addClass('w-24');
+      }
+    });
 
 	var MyRows = $(`#${TableID}`).find('tbody').find('tr');
 	console.log("Rows", MyRows.length);
 	for (var i = 0; i < MyRows.length; i++)
 	{
-		var Worth = $(MyRows[i]).find('td:eq(1)').text();
-		var SetSize = $(MyRows[i]).find('td:eq(3)').text();
-
-        if (TableID == "private_watchlist")
-        {
-            var NewSetsAvail = SetSize.substring(3, SetSize.length - 7) + ')'; // Making the column smaller by removing the word Cards.
-            var SetSizeStart = SetSize.indexOf('of');
-            var SetSizeEnd = SetSize.indexOf(')');
-            var CardsIncluded = (SetSize.indexOf('Cards') == -1) ? 0 : -5; // Need to subtract more if the word Cards is still there.
-            SetSize = SetSize.substring(SetSizeStart + 3 , SetSizeEnd + CardsIncluded);
-        }
+		var Worth = $(MyRows[i]).find('td').eq(1).text();
+		var SetSize = $(MyRows[i]).find('td').eq(3).text();
 
 		if (BoosterCalc == "yes")
 		{
@@ -174,45 +161,49 @@ function ChangeTable(TableID, InitialSort, BoosterCalc)
 		else
 		{
 			var SetWorth = Worth*SetSize;
-			$(MyRows[i]).find('td:eq(3)').text(NewSetsAvail);
-
-            if (TableID == "inventorylist")
-            {
-                $(MyRows[i]).find('td:eq(4)').text(SetWorth);
-            } else {
-                $(MyRows[i]).append('<td>'+SetWorth+'</td>');
-            }
-
-            var GameColor = $(MyRows[i]).find('a').attr('class');
-			var StyleColor = $(MyRows[i]).find('a').css('color'); // Used by personal Stylish style.
-			if (TableID == 'inventorylist' && (GameColor != "green" || StyleColor == 'rgb(255, 0, 0)'))
-			{
-				$(MyRows[i]).css("display","none");
-			}
+            $(MyRows[i]).find('td').eq(4).text(SetWorth);
 		}
+	}
+
+    var table = $(`#${TableID}`).DataTable();
+    table.destroy(); // Need to destroy the table and then add headers before initiating new table.
+
+	var SortedColumn = 4;
+
+    if (BoosterCalc == "yes")
+	{
+		SortedColumn = 5;
+		InitialSort = 'desc';
+		$(`#${TableID} thead tr`).append('<th class="w-14" title="Booster Value">B V</th>');
+	}
+	else
+	{
+        $(`#${TableID} thead tr th`).eq(4).text('Set Worth');
 	}
 
 	$(`#${TableID}`).dataTable( {
 		dom: 'rt<"dataTables_footer"ip>',
 		"searching": false,
-		"destroy": true,
 		pageLength: -1,
 		autoWidth: false,
 		stateSave: true,
 		"order": [[ SortedColumn, InitialSort ], [ 0, 'asc' ]]
 	} );
 
-	console.log("Finished Steam Card Exchange Add Set Worth Column!");
+    $('#HideButtons').trigger('click'); // Hiding by default after loading this script.
+
+    console.log("Finished Steam Card Exchange Add Set Worth Column!");
 }
 
 function FilterTable(TableID)
 {
-	var CurrentFilter = $('#SCEFilter').val();
-	var MyRows = $(`#${TableID}`).find('tbody').find('tr');
+    var CurrentFilter = $('#SCEFilter').data("green-all");
+
+    var MyRows = $(`#${TableID}`).find('tbody').find('tr');
 	for (var i = 0; i < MyRows.length; i++)
 	{
-		var GameColor = $(MyRows[i]).find('a').attr('class');
-		var StyleColor = $(MyRows[i]).find('a').css('color');
+		var IsGreen = $(MyRows[i]).find('a div').hasClass('bg-key-green');
+		var StyleColor = $(MyRows[i]).find('a').css('color'); // Used by personal css style.
 
         if (CurrentFilter == 'All')
 		{
@@ -220,15 +211,23 @@ function FilterTable(TableID)
 		}
 		else
 		{
-			if (GameColor != 'green' || StyleColor == 'rgb(255, 0, 0)')
+			if (!IsGreen || StyleColor == 'rgb(255, 0, 0)')
 			{
 				$(MyRows[i]).css("display","none");
 			}
 		}
 	}
 
-	var FilterText = (CurrentFilter == 'All') ? 'Show Only Green' : 'Show All';
 	CurrentFilter = (CurrentFilter == 'All') ? 'Green' : 'All';
-	$('#SCEFilter').val(CurrentFilter);
-	$('#SCEFilter').text(FilterText);
+	$('#SCEFilter').data("green-all", CurrentFilter);
+	$('#SCEFilter').text("Show "+ CurrentFilter);
+}
+
+function HideButtons()
+{
+	var CurrentHider = $('#HideButtons').data("hide-show");
+    CurrentHider = (CurrentHider == 'Hide') ? 'Show' : 'Hide';
+	$('#HideButtons').data("hide-show", CurrentHider);
+	$('#HideButtons').text(CurrentHider + " Toggles");
+    $('div[class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0.5 my-0.5 items-start"]').toggle();
 }
