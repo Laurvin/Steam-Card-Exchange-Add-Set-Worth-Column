@@ -3,7 +3,7 @@
 // @namespace Steam Card Exchange Add Set Worth Column
 // @author Laurvin
 // @description Adds Set Worth
-// @version 4.0
+// @version 4.1
 // @icon https://i.imgur.com/XYzKXzK.png
 // @downloadURL https://github.com/Laurvin/Steam-Card-Exchange-Add-Set-Worth-Column/raw/master/Steam_Card_Exchange_Add_Set_Worth_Column.user.js
 // @updateURL https://github.com/Laurvin/Steam-Card-Exchange-Add-Set-Worth-Column/raw/master/Steam_Card_Exchange_Add_Set_Worth_Column.user.js
@@ -34,7 +34,7 @@ function init()
 
     $("<style type='text/css'> .w-14 {width: 3.5rem;} </style>").appendTo("head"); // Adding a 56px wide style for the columns.
 
-	$('span[class="tracking-wider font-league-gothic"]').eq(1).after('&nbsp;<a class="btn-primary lg:w-min" id="HideButtons" title="Hide the below div with the checkbox toggles that control the table filtering.">Hide Toggles</a>');
+	$('span[class="tracking-wider font-league-gothic"]').eq(0).after('&nbsp;<a class="btn-primary lg:w-min" id="HideButtons" title="Hide the below div with the checkbox toggles that control the table filtering.">Hide Toggles</a>');
 	$('#HideButtons').data("hide-show", "Hide");
     $('#HideButtons').on("click", function()
 	{
